@@ -1,0 +1,142 @@
+{
+  "metadata": {
+    "name": "OWASP Top 10 Detection Rules",
+    "version": "1.0.0",
+    "standard": "OWASP Top 10 2021",
+    "description": "Detection rules derived from OWASP Top 10 2021 for Python source code analysis."
+  },
+  "rules": [
+    {
+      "id": "OWASP-A02-001",
+      "category": "Cryptographic Failures",
+      "owasp_ref": "A02:2021 - Cryptographic Failures",
+      "cwe": "CWE-328",
+      "type": "Weak Hashing Algorithm",
+      "severity": "critical",
+      "pattern": "hashlib\\.(md5|sha1)\\(",
+      "description": "MD5 and SHA-1 are cryptographically broken hash functions. OWASP A02:2021 prohibits use of weak or deprecated cryptographic algorithms.",
+      "remediation": "Use SHA-256, SHA-384, or SHA-512. Example: hashlib.sha256(data)"
+    },
+    {
+      "id": "OWASP-A02-002",
+      "category": "Cryptographic Failures",
+      "owasp_ref": "A02:2021 - Cryptographic Failures",
+      "cwe": "CWE-328",
+      "type": "Weak Hashing Algorithm",
+      "severity": "critical",
+      "pattern": "from\\s+Crypto\\.Hash\\s+import\\s+(MD5|SHA1)",
+      "description": "Importing MD5 or SHA-1 from PyCrypto/PyCryptodome indicates use of broken hash functions. OWASP A02:2021 requires strong, approved algorithms.",
+      "remediation": "Use SHA-256 or SHA-3: from Crypto.Hash import SHA256"
+    },
+    {
+      "id": "OWASP-A02-003",
+      "category": "Cryptographic Failures",
+      "owasp_ref": "A02:2021 - Cryptographic Failures",
+      "cwe": "CWE-327",
+      "type": "Weak Encryption Algorithm",
+      "severity": "critical",
+      "pattern": "DES\\.(new|MODE)",
+      "description": "DES (Data Encryption Standard) is a broken symmetric cipher. OWASP A02:2021 prohibits weak encryption algorithms that are known to be insecure.",
+      "remediation": "Use AES-256 with GCM mode: from Crypto.Cipher import AES; AES.new(key, AES.MODE_GCM)"
+    },
+    {
+      "id": "OWASP-A02-004",
+      "category": "Cryptographic Failures",
+      "owasp_ref": "A02:2021 - Cryptographic Failures",
+      "cwe": "CWE-327",
+      "type": "Weak Encryption Algorithm",
+      "severity": "critical",
+      "pattern": "Crypto\\.Cipher\\.DES",
+      "description": "DES cipher imported from PyCrypto/PyCryptodome. DES is a broken algorithm. OWASP A02:2021 requires the use of strong, modern encryption.",
+      "remediation": "Replace with AES: from Crypto.Cipher import AES"
+    },
+    {
+      "id": "OWASP-A02-005",
+      "category": "Cryptographic Failures",
+      "owasp_ref": "A02:2021 - Cryptographic Failures",
+      "cwe": "CWE-327",
+      "type": "Insecure Cipher Mode",
+      "severity": "high",
+      "pattern": "AES\\.MODE_ECB",
+      "description": "AES ECB mode encrypts identical plaintext blocks into identical ciphertext blocks, revealing data patterns. OWASP A02:2021 requires semantically secure cipher modes.",
+      "remediation": "Use AES.MODE_GCM (authenticated) or AES.MODE_CBC with a random IV."
+    },
+    {
+      "id": "OWASP-A02-006",
+      "category": "Cryptographic Failures",
+      "owasp_ref": "A02:2021 - Cryptographic Failures",
+      "cwe": "CWE-338",
+      "type": "Insecure Random Generation",
+      "severity": "medium",
+      "pattern": "random\\.random\\(\\)",
+      "description": "Python's random.random() uses the Mersenne Twister PRNG which is not cryptographically secure. OWASP A02:2021 requires cryptographically strong random number generation.",
+      "remediation": "Use the secrets module: import secrets; secrets.token_bytes(32)"
+    },
+    {
+      "id": "OWASP-A02-007",
+      "category": "Cryptographic Failures",
+      "owasp_ref": "A02:2021 - Cryptographic Failures",
+      "cwe": "CWE-338",
+      "type": "Insecure Random Generation",
+      "severity": "medium",
+      "pattern": "random\\.randint\\(",
+      "description": "random.randint() is not cryptographically secure. OWASP A02:2021 requires use of cryptographically strong random generators for security-sensitive operations.",
+      "remediation": "Use secrets.randbelow(n) for cryptographic purposes."
+    },
+    {
+      "id": "OWASP-A02-008",
+      "category": "Cryptographic Failures",
+      "owasp_ref": "A02:2021 - Cryptographic Failures",
+      "cwe": "CWE-326",
+      "type": "Insufficient RSA Key Size",
+      "severity": "critical",
+      "pattern": "RSA\\.generate\\((512|1024)\\)",
+      "description": "RSA keys shorter than 2048 bits are vulnerable to factorization attacks. OWASP A02:2021 requires adequate encryption strength.",
+      "remediation": "Use RSA.generate(2048) or higher. RSA.generate(4096) recommended for long-term security."
+    },
+    {
+      "id": "OWASP-A07-001",
+      "category": "Identification and Authentication Failures",
+      "owasp_ref": "A07:2021 - Identification and Authentication Failures",
+      "cwe": "CWE-798",
+      "type": "Hardcoded Secret",
+      "severity": "high",
+      "pattern": "(password|secret|api_key|token)\\s*=\\s*[\"'][^\"']+[\"']",
+      "description": "Hardcoded credentials in source code are exposed to anyone with code access. OWASP A07:2021 identifies hardcoded passwords as a critical authentication failure.",
+      "remediation": "Store secrets in environment variables: os.environ.get('SECRET_KEY') or use a secrets manager."
+    },
+    {
+      "id": "OWASP-A07-002",
+      "category": "Identification and Authentication Failures",
+      "owasp_ref": "A07:2021 - Identification and Authentication Failures",
+      "cwe": "CWE-798",
+      "type": "Hardcoded Secret",
+      "severity": "high",
+      "pattern": "SECRET_KEY\\s*=\\s*[\"'][^\"']+[\"']",
+      "description": "SECRET_KEY is hardcoded in source code. This is a critical security risk exposing cryptographic keys. OWASP A07:2021 prohibits hardcoded authentication credentials.",
+      "remediation": "Use environment variables: SECRET_KEY = os.environ.get('SECRET_KEY')"
+    },
+    {
+      "id": "OWASP-A02-009",
+      "category": "Cryptographic Failures",
+      "owasp_ref": "A02:2021 - Cryptographic Failures",
+      "cwe": "CWE-295",
+      "type": "Disabled TLS Verification",
+      "severity": "critical",
+      "pattern": "verify=False",
+      "description": "Disabling TLS certificate verification allows man-in-the-middle attacks. OWASP A02:2021 requires proper certificate validation for all encrypted communications.",
+      "remediation": "Always use verify=True (default): requests.get(url, verify=True)"
+    },
+    {
+      "id": "OWASP-A02-010",
+      "category": "Cryptographic Failures",
+      "owasp_ref": "A02:2021 - Cryptographic Failures",
+      "cwe": "CWE-327",
+      "type": "Weak Encryption Algorithm",
+      "severity": "critical",
+      "pattern": "from\\s+Crypto\\.Cipher\\s+import\\s+(ARC4|RC4|RC2|Blowfish)",
+      "description": "RC4, RC2, and Blowfish are weak ciphers not recommended for use. OWASP A02:2021 requires strong, modern encryption algorithms.",
+      "remediation": "Use AES-256 with GCM mode for authenticated encryption."
+    }
+  ]
+}

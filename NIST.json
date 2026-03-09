@@ -1,0 +1,459 @@
+{
+  "metadata": {
+    "name": "NIST Cryptographic Algorithm Rules",
+    "version": "1.0.0",
+    "sources": [
+      "NIST SP 800-131A Rev.2 (March 2019) - Transitioning the Use of Cryptographic Algorithms and Key Lengths",
+      "NIST SP 800-131A Rev.3 IPD (October 2024) - Initial Public Draft",
+      "NIST SP 800-57 Part 1 Rev.5 - Recommendation for Key Management",
+      "NIST SP 800-90A Rev.1 - Recommendation for Random Number Generation Using DRBGs",
+      "NIST SP 800-52 Rev.2 - Guidelines for TLS Implementations",
+      "NIST SP 800-132 - Recommendation for Password-Based Key Derivation",
+      "FIPS 197 - Advanced Encryption Standard (AES)",
+      "FIPS 180-4 - Secure Hash Standard (SHS)",
+      "FIPS 186-5 - Digital Signature Standard (DSS)",
+      "FIPS 202 - SHA-3 Standard"
+    ],
+    "last_updated": "2025-02-25",
+    "description": "Machine-readable ruleset derived from official NIST publications for detecting cryptographic vulnerabilities in Python source code. Every rule cites the exact NIST section it is derived from."
+  },
+  "rules": [
+    {
+      "id": "NIST-SYM-001",
+      "category": "Symmetric Encryption",
+      "nist_ref": "SP 800-131A Rev.2 Section 2, Table 1",
+      "nist_rev3_ref": "SP 800-131A Rev.3 IPD Section 2.1",
+      "cwe": "CWE-327",
+      "type": "Weak Encryption Algorithm",
+      "severity": "critical",
+      "status": "disallowed",
+      "patterns": [
+        "DES\\.new\\(",
+        "Crypto\\.Cipher\\.DES[^3]",
+        "from Crypto\\.Cipher import DES[^3]",
+        "algorithms\\.TripleDES\\(",
+        "Cipher\\(algorithms\\.TripleDES",
+        "from cryptography\\.hazmat\\.primitives\\.ciphers\\.algorithms import TripleDES"
+      ],
+      "description": "Two-key and three-key TDEA (DES/3DES) encryption is disallowed for applying cryptographic protection. TDEA was deprecated and is now fully disallowed after December 31, 2023 per SP 800-131A Rev.2 Section 2.",
+      "remediation": "Use AES-128, AES-192, or AES-256 as specified in FIPS 197. Example: from cryptography.hazmat.primitives.ciphers.algorithms import AES"
+    },
+    {
+      "id": "NIST-SYM-002",
+      "category": "Symmetric Encryption",
+      "nist_ref": "SP 800-131A Rev.2 Section 2, Table 1",
+      "cwe": "CWE-327",
+      "type": "Weak Encryption Algorithm",
+      "severity": "critical",
+      "status": "disallowed",
+      "patterns": [
+        "SKIPJACK",
+        "skipjack"
+      ],
+      "description": "SKIPJACK encryption is disallowed per SP 800-131A Rev.2 Section 2. It is a classified NSA cipher formally disallowed by NIST for all applications.",
+      "remediation": "Use AES-128, AES-192, or AES-256 as specified in FIPS 197."
+    },
+    {
+      "id": "NIST-SYM-003",
+      "category": "Cipher Mode",
+      "nist_ref": "SP 800-131A Rev.3 IPD Section 2.2",
+      "cwe": "CWE-327",
+      "type": "Insecure Cipher Mode",
+      "severity": "critical",
+      "status": "disallowed",
+      "patterns": [
+        "AES\\.MODE_ECB",
+        "mode=AES\\.MODE_ECB",
+        "MODE_ECB",
+        "modes\\.ECB\\("
+      ],
+      "description": "AES ECB (Electronic Codebook) mode is disallowed for encryption per SP 800-131A Rev.3 IPD Section 2.2. ECB encrypts identical plaintext blocks into identical ciphertext blocks, revealing data patterns and providing no semantic security.",
+      "remediation": "Use AES-GCM (authenticated encryption) or AES-CBC with a random IV. Example: from cryptography.hazmat.primitives.ciphers import modes; modes.GCM(nonce)"
+    },
+    {
+      "id": "NIST-SYM-004",
+      "category": "Symmetric Encryption",
+      "nist_ref": "SP 800-131A Rev.2 Section 2 — Non-approved algorithm",
+      "cwe": "CWE-327",
+      "type": "Non-Approved Encryption Algorithm",
+      "severity": "critical",
+      "status": "disallowed",
+      "patterns": [
+        "Blowfish",
+        "blowfish",
+        "from Crypto\\.Cipher import Blowfish",
+        "algorithms\\.Blowfish"
+      ],
+      "description": "Blowfish is not included in any NIST-approved algorithm list. It uses a 64-bit block size making it vulnerable to birthday attacks (SWEET32 attack). Only AES is NIST-approved for symmetric encryption per FIPS 197.",
+      "remediation": "Use AES-128, AES-192, or AES-256 (FIPS 197)."
+    },
+    {
+      "id": "NIST-SYM-005",
+      "category": "Symmetric Encryption",
+      "nist_ref": "SP 800-131A Rev.2 Section 2 — Non-approved algorithm",
+      "cwe": "CWE-327",
+      "type": "Non-Approved Encryption Algorithm",
+      "severity": "critical",
+      "status": "disallowed",
+      "patterns": [
+        "RC2",
+        "RC4",
+        "ARC4",
+        "Cipher\\.RC2",
+        "Cipher\\.RC4",
+        "from Crypto\\.Cipher import ARC4",
+        "from Crypto\\.Cipher import RC2"
+      ],
+      "description": "RC2 and RC4 (ARC4) are not NIST-approved algorithms. RC4 has multiple critical cryptographic weaknesses and is prohibited in all modern security standards. Neither appears in any NIST-approved algorithm list.",
+      "remediation": "Use AES-128, AES-192, or AES-256 (FIPS 197)."
+    },
+    {
+      "id": "NIST-HASH-001",
+      "category": "Hash Functions",
+      "nist_ref": "SP 800-131A Rev.2 Section 9, Table 9",
+      "cwe": "CWE-328",
+      "type": "Weak Hashing Algorithm",
+      "severity": "critical",
+      "status": "disallowed",
+      "patterns": [
+        "hashlib\\.md5\\(",
+        "hashlib\\.new\\(['\"]md5['\"]",
+        "MD5\\.new\\(",
+        "from Crypto\\.Hash import MD5",
+        "from hashlib import md5"
+      ],
+      "description": "MD5 is not approved for any security application per SP 800-131A Rev.2 Section 9. It is vulnerable to collision and preimage attacks and does not appear in FIPS 180-4 approved hash functions.",
+      "remediation": "Use SHA-256, SHA-384, or SHA-512 as specified in FIPS 180-4. Example: hashlib.sha256(data)"
+    },
+    {
+      "id": "NIST-HASH-002",
+      "category": "Hash Functions",
+      "nist_ref": "SP 800-131A Rev.2 Section 9; SP 800-131A Rev.3 IPD Section 9",
+      "cwe": "CWE-328",
+      "type": "Weak Hashing Algorithm",
+      "severity": "high",
+      "status": "deprecated",
+      "patterns": [
+        "hashlib\\.sha1\\(",
+        "hashlib\\.new\\(['\"]sha1['\"]",
+        "SHA\\.new\\(",
+        "SHA1\\.new\\(",
+        "from Crypto\\.Hash import SHA1",
+        "from hashlib import sha1"
+      ],
+      "description": "SHA-1 is disallowed for digital signature generation per SP 800-131A Rev.2 Section 9. Per Rev.3 IPD, SHA-1 is deprecated for all non-digital-signature cryptographic protection through December 31, 2030 and disallowed thereafter.",
+      "remediation": "Use SHA-256, SHA-384, or SHA-512 (FIPS 180-4) or SHA3-256, SHA3-384, SHA3-512 (FIPS 202). Example: hashlib.sha256(data)"
+    },
+    {
+      "id": "NIST-HASH-003",
+      "category": "Hash Functions",
+      "nist_ref": "SP 800-131A Rev.3 IPD Section 9",
+      "cwe": "CWE-328",
+      "type": "Weak Hashing Algorithm",
+      "severity": "medium",
+      "status": "deprecated",
+      "patterns": [
+        "hashlib\\.sha224\\(",
+        "hashlib\\.new\\(['\"]sha224['\"]",
+        "SHA224\\.new\\(",
+        "from Crypto\\.Hash import SHA224"
+      ],
+      "description": "SHA-224 (224-bit output) is deprecated through December 31, 2030 and disallowed thereafter per SP 800-131A Rev.3 IPD Section 9. The 224-bit security margin is considered insufficient for long-term security.",
+      "remediation": "Use SHA-256, SHA-384, or SHA-512 (FIPS 180-4). Example: hashlib.sha256(data)"
+    },
+    {
+      "id": "NIST-HASH-004",
+      "category": "Hash Functions",
+      "nist_ref": "FIPS 180-4 — Non-approved algorithm",
+      "cwe": "CWE-328",
+      "type": "Non-Approved Hash Function",
+      "severity": "medium",
+      "status": "disallowed",
+      "patterns": [
+        "hashlib\\.new\\(['\"]whirlpool['\"]",
+        "hashlib\\.new\\(['\"]ripemd160['\"]",
+        "RIPEMD160",
+        "ripemd160"
+      ],
+      "description": "RIPEMD-160 and Whirlpool are not NIST-approved hash functions. FIPS 180-4 only approves SHA-2 family and FIPS 202 approves SHA-3 family.",
+      "remediation": "Use SHA-256, SHA-384, or SHA-512 (FIPS 180-4). Example: hashlib.sha256(data)"
+    },
+    {
+      "id": "NIST-ASYM-001",
+      "category": "Asymmetric Cryptography",
+      "nist_ref": "SP 800-131A Rev.2 Section 5, Table 4; SP 800-57 Part 1 Rev.5 Section 5.6",
+      "cwe": "CWE-326",
+      "type": "Insufficient RSA Key Size",
+      "severity": "critical",
+      "status": "disallowed",
+      "patterns": [
+        "RSA\\.generate\\(512",
+        "RSA\\.generate\\(768",
+        "RSA\\.generate\\(1024",
+        "rsa\\.generate_private_key.*key_size=512",
+        "rsa\\.generate_private_key.*key_size=768",
+        "rsa\\.generate_private_key.*key_size=1024",
+        "generate_private_key\\(.*key_size=512",
+        "generate_private_key\\(.*key_size=1024"
+      ],
+      "description": "RSA key sizes less than 2048 bits are disallowed per SP 800-131A Rev.2 Section 5. Keys of 512 and 1024 bits provide fewer than 80 bits of security strength and are vulnerable to factorization attacks. SP 800-57 Part 1 Rev.5 Section 5.6 requires minimum 2048-bit keys.",
+      "remediation": "Use RSA with minimum 2048-bit key size. 3072 or 4096 bits recommended for long-term security. Example: rsa.generate_private_key(public_exponent=65537, key_size=2048)"
+    },
+    {
+      "id": "NIST-ASYM-002",
+      "category": "Asymmetric Cryptography",
+      "nist_ref": "SP 800-131A Rev.2 Section 6",
+      "cwe": "CWE-780",
+      "type": "Disallowed RSA Padding Scheme",
+      "severity": "high",
+      "status": "disallowed",
+      "patterns": [
+        "PKCS1_v1_5",
+        "pkcs1_v1_5",
+        "PKCS1v15\\(",
+        "padding\\.PKCS1v15",
+        "from Crypto\\.Cipher import PKCS1_v1_5",
+        "from Crypto\\.Signature import PKCS1_v1_5"
+      ],
+      "description": "PKCS#1 v1.5 RSA padding is disallowed after December 31, 2023 per SP 800-131A Rev.2 Section 6. It is vulnerable to Bleichenbacher adaptive chosen-ciphertext padding oracle attacks.",
+      "remediation": "Use RSA-OAEP for encryption or RSA-PSS for signatures. Example: padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA256()), algorithm=hashes.SHA256(), label=None)"
+    },
+    {
+      "id": "NIST-ASYM-003",
+      "category": "Asymmetric Cryptography",
+      "nist_ref": "SP 800-131A Rev.3 IPD Section 3; FIPS 186-5",
+      "cwe": "CWE-327",
+      "type": "Retired Digital Signature Algorithm",
+      "severity": "critical",
+      "status": "disallowed",
+      "patterns": [
+        "DSA\\.generate\\(",
+        "from Crypto\\.PublicKey import DSA",
+        "dsa\\.generate_parameters\\(",
+        "dsa\\.generate_private_key\\(",
+        "from cryptography\\.hazmat\\.primitives\\.asymmetric import dsa"
+      ],
+      "description": "DSA for signature generation is retired per SP 800-131A Rev.3 IPD Section 3 and FIPS 186-5. DSA has been removed from the approved signature generation algorithm list.",
+      "remediation": "Use ECDSA with NIST P-256, P-384, or P-521 curves, or RSA-PSS. Example: ec.generate_private_key(ec.SECP256R1())"
+    },
+    {
+      "id": "NIST-ASYM-004",
+      "category": "Asymmetric Cryptography — ECC",
+      "nist_ref": "SP 800-131A Rev.2 Section 3; SP 800-57 Part 1 Rev.5 Section 5.6",
+      "cwe": "CWE-326",
+      "type": "Weak Elliptic Curve",
+      "severity": "critical",
+      "status": "disallowed",
+      "patterns": [
+        "SECP112R1",
+        "SECP128R1",
+        "SECP160R1",
+        "SECT113R1",
+        "SECT131R1",
+        "SECT163K1",
+        "SECT163R1",
+        "SECT163R2",
+        "ec\\.SECP192R1",
+        "brainpoolP160",
+        "curve=ec\\.SECP192"
+      ],
+      "description": "Elliptic curves with field sizes below 224 bits provide less than 112 bits of security strength and are disallowed per SP 800-131A Rev.2 Section 3. These curves do not meet the minimum security strength requirement in SP 800-57 Part 1 Rev.5 Section 5.6.",
+      "remediation": "Use NIST-approved curves: P-256 (SECP256R1), P-384 (SECP384R1), or P-521 (SECP521R1). Example: ec.generate_private_key(ec.SECP256R1())"
+    },
+    {
+      "id": "NIST-ASYM-005",
+      "category": "Asymmetric Cryptography",
+      "nist_ref": "SP 800-131A Rev.2 Section 4; SP 800-56A Rev.3",
+      "cwe": "CWE-326",
+      "type": "Weak Diffie-Hellman Parameters",
+      "severity": "critical",
+      "status": "disallowed",
+      "patterns": [
+        "dh\\.generate_parameters.*key_size=512",
+        "dh\\.generate_parameters.*key_size=768",
+        "dh\\.generate_parameters.*key_size=1024",
+        "DHParameters.*1024",
+        "DiffieHellman.*1024"
+      ],
+      "description": "Diffie-Hellman modulus length below 2048 bits is disallowed per SP 800-131A Rev.2 Section 4 and SP 800-56A Rev.3. Small DH parameters are vulnerable to the Logjam attack and discrete logarithm computation.",
+      "remediation": "Use DH parameters with at least 2048-bit modulus. Example: dh.generate_parameters(generator=2, key_size=2048)"
+    },
+    {
+      "id": "NIST-RNG-001",
+      "category": "Random Number Generation",
+      "nist_ref": "SP 800-90A Rev.1 Section 1; SP 800-131A Rev.2 Section 8",
+      "cwe": "CWE-338",
+      "type": "Non-Approved Random Number Generator",
+      "severity": "high",
+      "status": "disallowed",
+      "patterns": [
+        "random\\.random\\(\\)",
+        "random\\.randint\\(",
+        "random\\.choice\\(",
+        "random\\.shuffle\\(",
+        "random\\.sample\\(",
+        "random\\.uniform\\(",
+        "import random"
+      ],
+      "description": "Python's random module uses the Mersenne Twister PRNG which is NOT a NIST-approved Deterministic Random Bit Generator (DRBG). SP 800-90A Rev.1 specifies approved DRBGs: CTR_DRBG (AES), Hash_DRBG, and HMAC_DRBG. Using non-approved PRNGs for security purposes violates SP 800-131A Rev.2 Section 8.",
+      "remediation": "Use the secrets module or os.urandom() for cryptographic operations. Example: import secrets; secrets.token_bytes(32) or secrets.randbelow(n)"
+    },
+    {
+      "id": "NIST-RNG-002",
+      "category": "Random Number Generation",
+      "nist_ref": "SP 800-131A Rev.2 Section 8; SP 800-90A Rev.1 Section 3",
+      "cwe": "CWE-338",
+      "type": "Explicitly Disallowed DRBG",
+      "severity": "critical",
+      "status": "disallowed",
+      "patterns": [
+        "Dual_EC_DRBG",
+        "DUAL_EC",
+        "dual_ec"
+      ],
+      "description": "Dual_EC_DRBG is explicitly disallowed per SP 800-131A Rev.2 Section 8 and was removed from SP 800-90A. It was found to potentially contain a backdoor allowing prediction of random outputs.",
+      "remediation": "Use CTR_DRBG with AES-256, Hash_DRBG with SHA-512, or HMAC_DRBG with SHA-512 as specified in SP 800-90A Rev.1. In Python: use secrets module or os.urandom()."
+    },
+    {
+      "id": "NIST-KEY-001",
+      "category": "Key Management",
+      "nist_ref": "SP 800-57 Part 1 Rev.5 Section 8.1",
+      "cwe": "CWE-321",
+      "type": "Hardcoded Cryptographic Key",
+      "severity": "critical",
+      "status": "disallowed",
+      "patterns": [
+        "(secret_key|SECRET_KEY|private_key|PRIVATE_KEY|encryption_key|aes_key|AES_KEY)\\s*=\\s*['\"][^'\"]{8,}['\"]",
+        "(key|KEY)\\s*=\\s*b['\"][^'\"]{8,}['\"]",
+        "AES\\.new\\(['\"][^'\"]+['\"]",
+        "DES\\.new\\(['\"][^'\"]+['\"]"
+      ],
+      "description": "Hardcoded cryptographic keys violate SP 800-57 Part 1 Rev.5 Section 8.1 key management requirements. Keys embedded in source code are exposed to version control, logs, and all personnel with code access, violating the key confidentiality requirement.",
+      "remediation": "Store keys in environment variables, HSMs, or a secrets manager. Example: key = os.environ.get('ENCRYPTION_KEY')"
+    },
+    {
+      "id": "NIST-KEY-002",
+      "category": "Key Management",
+      "nist_ref": "SP 800-57 Part 1 Rev.5 Section 8.1 and Section 4.3.4",
+      "cwe": "CWE-798",
+      "type": "Hardcoded Password or Credential",
+      "severity": "high",
+      "status": "disallowed",
+      "patterns": [
+        "(password|passwd|pwd)\\s*=\\s*['\"][^'\"]+['\"]",
+        "(api_key|apikey|API_KEY)\\s*=\\s*['\"][^'\"]+['\"]",
+        "(token|TOKEN|auth_token)\\s*=\\s*['\"][^'\"]+['\"]",
+        "(secret|SECRET)\\s*=\\s*['\"][^'\"]+['\"]",
+        "(credential|CREDENTIAL)\\s*=\\s*['\"][^'\"]+['\"]"
+      ],
+      "description": "Hardcoded passwords and credentials violate SP 800-57 Part 1 Rev.5 Section 8.1 and 4.3.4 key and credential management requirements. Credentials in source code cannot be rotated without a code change and are exposed to all reviewers.",
+      "remediation": "Use environment variables or a secrets manager. Example: password = os.environ.get('APP_PASSWORD')"
+    },
+    {
+      "id": "NIST-KEY-003",
+      "category": "Key Management",
+      "nist_ref": "SP 800-131A Rev.2 Section 7; SP 800-57 Part 1 Rev.5 Section 5.3",
+      "cwe": "CWE-326",
+      "type": "Insufficient HMAC Key Length",
+      "severity": "high",
+      "status": "disallowed",
+      "patterns": [
+        "hmac\\.new\\(b['\"][^'\"]{1,13}['\"]",
+        "HMAC\\.new\\(b['\"][^'\"]{1,13}['\"]"
+      ],
+      "description": "HMAC keys less than 112 bits (14 bytes) are disallowed per SP 800-131A Rev.2 Section 7. Short HMAC keys reduce the security strength of the MAC below the minimum approved level of 112 bits.",
+      "remediation": "Use HMAC keys of at least 112 bits (14 bytes). Recommended minimum is 256 bits (32 bytes). Example: key = secrets.token_bytes(32)"
+    },
+    {
+      "id": "NIST-TLS-001",
+      "category": "Transport Layer Security",
+      "nist_ref": "NIST SP 800-52 Rev.2 Section 3.1",
+      "cwe": "CWE-326",
+      "type": "Deprecated TLS/SSL Version",
+      "severity": "critical",
+      "status": "disallowed",
+      "patterns": [
+        "ssl\\.PROTOCOL_SSLv2",
+        "ssl\\.PROTOCOL_SSLv3",
+        "ssl\\.PROTOCOL_TLSv1\\b",
+        "ssl\\.PROTOCOL_TLSv1_1",
+        "PROTOCOL_SSLv2",
+        "PROTOCOL_SSLv3",
+        "SSLv2",
+        "SSLv3",
+        "TLSv1_1",
+        "TLSv1\\.1"
+      ],
+      "description": "SSLv2, SSLv3, TLS 1.0 and TLS 1.1 are disallowed per NIST SP 800-52 Rev.2 Section 3.1. Known critical vulnerabilities include POODLE (SSLv3), BEAST (TLS 1.0), and DROWN (SSLv2).",
+      "remediation": "Configure minimum TLS 1.2. TLS 1.3 is preferred. Example: context.minimum_version = ssl.TLSVersion.TLSv1_2"
+    },
+    {
+      "id": "NIST-TLS-002",
+      "category": "Transport Layer Security",
+      "nist_ref": "NIST SP 800-52 Rev.2 Section 3.4",
+      "cwe": "CWE-295",
+      "type": "Disabled Certificate Verification",
+      "severity": "critical",
+      "status": "disallowed",
+      "patterns": [
+        "verify=False",
+        "check_hostname.*=.*False",
+        "verify_mode.*CERT_NONE",
+        "ssl\\.CERT_NONE",
+        "CERT_NONE",
+        "ssl_verify.*=.*False"
+      ],
+      "description": "Disabling TLS certificate verification violates SP 800-52 Rev.2 Section 3.4 which mandates server certificate validation to prevent man-in-the-middle attacks.",
+      "remediation": "Always enable certificate verification. Example: requests.get(url, verify=True) or ssl_context.verify_mode = ssl.CERT_REQUIRED"
+    },
+    {
+      "id": "NIST-MAC-001",
+      "category": "Message Authentication",
+      "nist_ref": "SP 800-131A Rev.2 Section 7; SP 800-38B",
+      "cwe": "CWE-327",
+      "type": "Non-Approved MAC Algorithm",
+      "severity": "high",
+      "status": "disallowed",
+      "patterns": [
+        "hmac.*md5",
+        "HMAC.*MD5",
+        "hmac\\.new\\(.*hashlib\\.md5",
+        "hmac\\.new\\(.*['\"]md5['\"]"
+      ],
+      "description": "HMAC-MD5 uses MD5 which is not an approved hash function per SP 800-131A Rev.2 Section 9. SP 800-38B and SP 800-131A Section 7 require approved hash functions for all MAC generation.",
+      "remediation": "Use HMAC-SHA256 or HMAC-SHA512. Example: hmac.new(key, msg, hashlib.sha256)"
+    },
+    {
+      "id": "NIST-KDF-001",
+      "category": "Key Derivation",
+      "nist_ref": "SP 800-132 Section 5.3; SP 800-131A Rev.2 Section 8",
+      "cwe": "CWE-916",
+      "type": "Non-Approved Hash in KDF",
+      "severity": "high",
+      "status": "disallowed",
+      "patterns": [
+        "pbkdf2_hmac\\(['\"]md5['\"]",
+        "pbkdf2_hmac\\(['\"]sha1['\"]",
+        "PBKDF2HMAC.*MD5",
+        "PBKDF2HMAC.*SHA1"
+      ],
+      "description": "PBKDF2 with MD5 or SHA-1 is not recommended. SP 800-132 Section 5.3 requires NIST-approved PRFs for key derivation. SHA-1 is deprecated and MD5 is fully disallowed per SP 800-131A Rev.2.",
+      "remediation": "Use PBKDF2-HMAC-SHA256 or PBKDF2-HMAC-SHA512. Example: hashlib.pbkdf2_hmac('sha256', password, salt, 600000)"
+    },
+    {
+      "id": "NIST-KDF-002",
+      "category": "Key Derivation",
+      "nist_ref": "SP 800-132 Section 5.1",
+      "cwe": "CWE-916",
+      "type": "Insufficient PBKDF2 Iterations",
+      "severity": "medium",
+      "status": "deprecated",
+      "patterns": [
+        "pbkdf2_hmac\\(.*,\\s*[1-9]\\d{0,3}\\s*[,\\)]",
+        "PBKDF2HMAC.*iterations=[1-9]\\d{0,4}[^0-9]"
+      ],
+      "description": "PBKDF2 iteration counts below 100,000 are insufficient per SP 800-132 guidance. Low iteration counts make offline brute-force attacks feasible against derived keys.",
+      "remediation": "Use at least 600,000 iterations for PBKDF2-HMAC-SHA256. Example: hashlib.pbkdf2_hmac('sha256', pwd, salt, 600000)"
+    }
+  ]
+}
